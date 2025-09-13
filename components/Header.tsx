@@ -1,16 +1,16 @@
-
+// Implemented the Header component, which was previously empty.
 import React from 'react';
-import { Bot } from 'lucide-react';
+import { BrainCircuit } from 'lucide-react';
 
 export const Header: React.FC = () => {
   return (
-    <header className="flex items-center h-16 px-6 bg-gray-900 border-b border-gray-700 shrink-0">
-      <div className="flex items-center gap-3">
-        <Bot className="w-8 h-8 text-purple-400" />
-        <h1 className="text-xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500 font-lexend">
-          AI Text-to-Visual Generator
-        </h1>
+    <header className="bg-gray-900/50 backdrop-blur-sm border-b border-gray-800 p-4 sticky top-0 z-10">
+      <div className="container mx-auto flex items-center gap-3">
+        <BrainCircuit className="w-8 h-8 text-purple-500" />
+        <h1 className="text-2xl font-bold text-white">AI Visualizer</h1>
       </div>
     </header>
   );
 };
+
+export default Header;

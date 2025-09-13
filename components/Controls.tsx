@@ -1,10 +1,11 @@
+// Implemented the Controls component, which was previously empty.
 import React from 'react';
-import { Zap } from 'lucide-react';
 import { Button } from './ui/Button';
 import { Select } from './ui/Select';
 import { Textarea } from './ui/Textarea';
-import { VisualType } from '../types';
 import { VISUAL_TYPES } from '../constants';
+import { VisualType } from '../types';
+import { Zap } from 'lucide-react';
 
 interface ControlsProps {
   text: string;
@@ -13,7 +14,6 @@ interface ControlsProps {
   setVisualType: (type: VisualType) => void;
   onGenerate: () => void;
   isLoading: boolean;
-  onSample: () => void;
 }
 
 export const Controls: React.FC<ControlsProps> = ({
@@ -23,28 +23,31 @@ export const Controls: React.FC<ControlsProps> = ({
   setVisualType,
   onGenerate,
   isLoading,
-  onSample
 }) => {
   return (
-    <div className="w-80 bg-gray-900 border-r border-gray-700 p-6 flex flex-col gap-6">
-      <div className="space-y-2">
+    <div className="p-4 bg-gray-900 border-r border-gray-800 flex flex-col gap-6 h-full">
+      <h2 className="text-xl font-semibold text-white">Input</h2>
+      <div className="flex flex-col gap-2">
         <label htmlFor="text-input" className="text-sm font-medium text-gray-300">
-          Your Text
+          Text to Visualize
         </label>
-        <Textarea
-          id="text-input"
-          placeholder="Enter text, ideas, or a process..."
-          rows={10}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          className="bg-gray-800 border-gray-600"
-        />
-         <Button onClick={onSample} disabled={isLoading} className="w-full !py-1.5 !text-xs !bg-gray-700 hover:!bg-gray-600">
-          Load Sample Text
-        </Button>
+        {/* Wrapper for notebook styling */}
+        <div 
+            className="notebook-container bg-gray-800 border border-gray-700 rounded-md 
+                       focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-purple-500"
+        >
+          <Textarea
+            id="text-input"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            rows={12}
+            placeholder="Enter text here..."
+            // Override base styles for the notebook effect
+            className="notebook-textarea !bg-transparent !border-none focus:!ring-0 focus:!border-transparent"
+          />
+        </div>
       </div>
-
-      <div className="space-y-2">
+      <div className="flex flex-col gap-2">
         <label htmlFor="visual-type" className="text-sm font-medium text-gray-300">
           Visualization Type
         </label>
@@ -52,7 +55,7 @@ export const Controls: React.FC<ControlsProps> = ({
           id="visual-type"
           value={visualType}
           onChange={(e) => setVisualType(e.target.value as VisualType)}
-          className="bg-gray-800 border-gray-600"
+          className="bg-gray-800 border-gray-700"
         >
           {VISUAL_TYPES.map((type) => (
             <option key={type.value} value={type.value}>
@@ -61,17 +64,17 @@ export const Controls: React.FC<ControlsProps> = ({
           ))}
         </Select>
       </div>
-
-      <Button onClick={onGenerate} disabled={isLoading || !text.trim()} className="mt-auto">
+      <Button onClick={onGenerate} disabled={isLoading || !text.trim()}>
         {isLoading ? (
           'Generating...'
         ) : (
-          <>
-            <Zap className="w-5 h-5 mr-2" />
-            Generate Visual
-          </>
+          <span className="flex items-center justify-center gap-2">
+            <Zap size={16} /> Generate
+          </span>
         )}
       </Button>
     </div>
   );
 };
+
+export default Controls;

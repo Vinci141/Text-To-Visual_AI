@@ -1,70 +1,71 @@
-import React from 'react';
-import { VisualData, VisualType } from '../types';
+// Implemented the Canvas component, which was previously empty.
+import React, { useRef, useState } from 'react';
+import { Loader } from './ui/Loader';
 import { MindMap } from './visuals/MindMap';
 import { Flowchart } from './visuals/Flowchart';
 import { ListComponent } from './visuals/ListComponent';
-import { Loader } from './ui/Loader';
 import { ExportControls } from './ExportControls';
-import { Bot, TriangleAlert } from 'lucide-react';
+import { VisualControls } from './VisualControls';
+import { VisualData, VisualType, MindMapNode, FlowchartItem, ListItem } from '../types';
+import { BrainCircuit } from 'lucide-react';
 
 interface CanvasProps {
+  visualData: VisualData | null;
   visualType: VisualType;
-  data: VisualData | null;
   isLoading: boolean;
   error: string | null;
-  canvasRef: React.RefObject<HTMLDivElement>;
-  onExport: (format: 'png' | 'svg' | 'pdf') => void;
 }
 
-const WelcomeMessage = () => (
-  <div className="flex flex-col items-center justify-center gap-4 text-center">
-    <Bot className="w-16 h-16 text-purple-400" />
-    <h2 className="text-2xl font-bold text-gray-200">Welcome to the AI Visual Generator</h2>
-    <p className="max-w-md text-gray-400">
-      Enter some text, select a visualization type, and watch the AI bring your ideas to life.
-    </p>
-  </div>
-);
+const isMindMapData = (data: VisualData | null): data is MindMapNode => {
+    return data !== null && 'label' in data && 'icon' in data && !Array.isArray(data);
+};
 
-const ErrorDisplay = ({ message }: { message: string }) => (
-  <div className="flex flex-col items-center justify-center gap-4 text-center text-red-400">
-    <TriangleAlert className="w-16 h-16" />
-    <h2 className="text-2xl font-bold">An Error Occurred</h2>
-    <p className="max-w-md">{message}</p>
-  </div>
-);
+const isFlowchartData = (data: VisualData | null): data is FlowchartItem[] => {
+    return Array.isArray(data) && (data.length === 0 || (data.length > 0 && 'type' in data[0]));
+}
 
+const isListData = (data: VisualData | null): data is ListItem[] => {
+    return Array.isArray(data) && (data.length === 0 || (data.length > 0 &&'description' in data[0]));
+}
 
-export const Canvas: React.FC<CanvasProps> = ({ visualType, data, isLoading, error, canvasRef, onExport }) => {
+export const Canvas: React.FC<CanvasProps> = ({ visualData, visualType, isLoading, error }) => {
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const [zoom, setZoom] = useState(100);
+
   const renderContent = () => {
     if (isLoading) {
       return <Loader />;
     }
     if (error) {
-      return <ErrorDisplay message={error} />;
+      return <p className="text-red-400 text-center max-w-md">{error}</p>;
     }
-    if (!data) {
-      return <WelcomeMessage />;
+    if (!visualData) {
+      return (
+        <div className="text-center text-gray-500 flex flex-col items-center gap-4">
+            <BrainCircuit size={48} />
+            <h2 className="text-2xl font-semibold">Visualize Your Ideas</h2>
+            <p>Enter some text and choose a visualization type to get started.</p>
+        </div>
+      )
     }
 
-    switch (visualType) {
-      case 'mind_map':
-        return <MindMap data={data as any} />;
-      case 'flowchart':
-        return <Flowchart data={data as any} />;
-      case 'list':
-        return <ListComponent data={data as any} />;
-      default:
-        return <WelcomeMessage />;
-    }
+    // This is the element that will be exported
+    return (
+        <div ref={canvasRef} className="w-full h-full flex items-center justify-center p-4 bg-gray-900">
+             {visualType === 'mind_map' && isMindMapData(visualData) && <MindMap data={visualData} zoom={zoom} />}
+             {visualType === 'flowchart' && isFlowchartData(visualData) && <Flowchart data={visualData} />}
+             {visualType === 'list' && isListData(visualData) && <ListComponent data={visualData} />}
+        </div>
+    );
   };
 
   return (
-    <div className="relative flex-1 bg-gray-800 flex items-center justify-center overflow-auto">
-      <div ref={canvasRef} className="bg-gray-800 text-white p-4">
-        {renderContent()}
-      </div>
-      {data && !isLoading && !error && <ExportControls onExport={onExport} />}
+    <div className="relative w-full h-full bg-gray-900 flex items-center justify-center overflow-auto">
+      {visualData && <ExportControls targetRef={canvasRef} />}
+      {renderContent()}
+      {visualType === 'mind_map' && visualData && <VisualControls zoom={zoom} setZoom={setZoom} />}
     </div>
   );
 };
+
+export default Canvas;

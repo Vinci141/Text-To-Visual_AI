@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.notebook-container {
+  position: relative;
+  overflow: hidden; /* Important for the ::before element and rounded corners */
+}
+
+/* Red margin line */
+.notebook-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 2.5rem; /* 40px */
+  bottom: 0;
+  width: 1px;
+  background-color: rgba(239, 68, 68, 0.5); /* red-500 with some transparency */
+}
+
+.notebook-textarea {
+  /* The base line height. The background gradient depends on this. */
+  --line-height: 2rem; /* 32px */
+  
+  /* Create the horizontal lines */
+  background-image: linear-gradient(to bottom, transparent calc(var(--line-height) - 1px), #4b5563 1px); /* gray-600 lines */
+  background-size: 100% var(--line-height);
+
+  /* Align text to the lines */
+  line-height: var(--line-height);
+
+  /* Add padding to account for the margin line and to align text */
+  padding-left: 3.5rem !important; /* 56px */
+  padding-top: 0.5rem !important; /* Give some space at the top */
+  padding-bottom: 0.5rem !important;
+  padding-right: 1rem !important;
+}
