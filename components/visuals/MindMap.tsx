@@ -1,49 +1,46 @@
 import React from 'react';
-import type { MindMapNode, StyleConfig } from '../../types';
+import { MindMapNode } from '../../types';
 import { Icon } from '../ui/Icon';
 
 interface MindMapProps {
   data: MindMapNode;
-  styleConfig: StyleConfig;
 }
 
-const Node: React.FC<{ node: MindMapNode; level: number; palette: string[] }> = ({ node, level, palette }) => {
-  const color = palette[level % palette.length];
-  const hasChildren = node.children && node.children.length > 0;
+const Node: React.FC<{ node: MindMapNode; isRoot?: boolean }> = ({ node, isRoot = false }) => {
+  const nodeBg = isRoot ? 'bg-purple-600' : 'bg-gray-700';
+  const nodeText = isRoot ? 'text-white' : 'text-gray-200';
+  const iconText = isRoot ? 'text-purple-200' : 'text-purple-300';
 
   return (
-    <div className="flex items-start">
-      {/* Node and its own branch line */}
-      <div className="flex flex-col items-center mr-4">
-        <div 
-          className="flex items-center gap-3 px-4 py-2 rounded-lg shadow-lg border-2"
-          style={{ borderColor: color, backgroundColor: `${color}20` }}
-        >
-          {/* FIX: The Icon component from lucide-react accepts a 'color' prop, not 'style', for setting the icon color. */}
-          <Icon name={node.icon} color={color} className="w-5 h-5 shrink-0" />
-          <span className="font-semibold text-gray-100">{node.label}</span>
-        </div>
-        {hasChildren && (
-          <div className="w-0.5 h-6" style={{ backgroundColor: color }}></div>
-        )}
+    <li className="relative flex items-center">
+      {/* Horizontal line from parent */}
+      {!isRoot && (
+        <div className="absolute top-1/2 -left-4 w-4 h-px bg-gray-600"></div>
+      )}
+
+      <div className={`flex items-center gap-3 px-4 py-2 rounded-lg shadow-lg ${nodeBg}`}>
+        <Icon name={node.icon} className={`w-5 h-5 ${iconText}`} />
+        <span className={`font-semibold ${nodeText}`}>{node.label}</span>
       </div>
 
-      {/* Children */}
-      {hasChildren && (
-        <div className="flex flex-col justify-around gap-4 pt-1">
-          {node.children?.map((child, index) => (
-            <Node key={index} node={child} level={level + 1} palette={palette} />
+      {node.children && node.children.length > 0 && (
+        <ul className="pl-8 flex flex-col justify-center gap-4 border-l-2 border-gray-600 ml-4">
+          {node.children.map((child, index) => (
+            <Node key={index} node={child} />
           ))}
-        </div>
+        </ul>
       )}
-    </div>
+    </li>
   );
 };
 
-export const MindMap: React.FC<MindMapProps> = ({ data, styleConfig }) => {
+export const MindMap: React.FC<MindMapProps> = ({ data }) => {
+  if (!data) return null;
   return (
-    <div className="p-4">
-      <Node node={data} level={0} palette={styleConfig.palette.colors} />
+    <div className="p-8 flex">
+      <ul>
+        <Node node={data} isRoot={true} />
+      </ul>
     </div>
   );
 };

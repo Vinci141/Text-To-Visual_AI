@@ -1,6 +1,6 @@
-
 import React, { useState } from 'react';
-import { Download, ChevronUp, Image as ImageIcon, FileText, FileJson } from 'lucide-react';
+// FIX: Changed FileJson to PenTool for SVG export and removed FileJson from imports.
+import { Download, ChevronUp, Image as ImageIcon, FileText, PenTool } from 'lucide-react';
 import { Button } from './ui/Button';
 
 interface ExportControlsProps {
@@ -20,7 +20,8 @@ export const ExportControls: React.FC<ExportControlsProps> = ({ onExport }) => {
               Export as PNG
             </button>
             <button onClick={() => onExport('svg')} className="flex items-center gap-3 text-left w-full px-3 py-2 text-sm rounded-md hover:bg-purple-500/20 text-gray-200 transition-colors">
-               <FileJson className="w-4 h-4" />
+               {/* FIX: Replaced incorrect FileJson icon with PenTool for SVG export. */}
+               <PenTool className="w-4 h-4" />
               Export as SVG
             </button>
             <button onClick={() => onExport('pdf')} className="flex items-center gap-3 text-left w-full px-3 py-2 text-sm rounded-md hover:bg-purple-500/20 text-gray-200 transition-colors">

@@ -1,97 +1,77 @@
-
 import React from 'react';
-import type { VisualType, StyleConfig } from '../types';
-import { VISUAL_TYPES, PALETTES, FONTS } from '../constants';
+import { Zap } from 'lucide-react';
 import { Button } from './ui/Button';
 import { Select } from './ui/Select';
 import { Textarea } from './ui/Textarea';
+import { VisualType } from '../types';
+import { VISUAL_TYPES } from '../constants';
 
 interface ControlsProps {
-  inputText: string;
-  setInputText: (text: string) => void;
+  text: string;
+  setText: (text: string) => void;
   visualType: VisualType;
   setVisualType: (type: VisualType) => void;
-  styleConfig: StyleConfig;
-  setStyleConfig: (config: StyleConfig) => void;
   onGenerate: () => void;
   isLoading: boolean;
+  onSample: () => void;
 }
 
 export const Controls: React.FC<ControlsProps> = ({
-  inputText,
-  setInputText,
+  text,
+  setText,
   visualType,
   setVisualType,
-  styleConfig,
-  setStyleConfig,
   onGenerate,
   isLoading,
+  onSample
 }) => {
   return (
-    <div className="flex flex-col gap-6 h-full">
-      <div className="flex-1 flex flex-col gap-6">
-        <div>
-          <label htmlFor="text-input" className="block text-sm font-medium text-gray-300 mb-2">
-            1. Enter your text
-          </label>
-          <Textarea
-            id="text-input"
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            placeholder="Paste your notes, ideas, or plans here..."
-            rows={10}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="visual-type" className="block text-sm font-medium text-gray-300 mb-2">
-            2. Choose visual type
-          </label>
-          <Select
-            id="visual-type"
-            value={visualType.id}
-            onChange={(e) => setVisualType(VISUAL_TYPES.find(v => v.id === e.target.value) || VISUAL_TYPES[0])}
-          >
-            {VISUAL_TYPES.map(v => <option key={v.id} value={v.id}>{v.label}</option>)}
-          </Select>
-        </div>
-
-        <div>
-          <h3 className="text-sm font-medium text-gray-300 mb-2">3. Customize style</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="palette" className="block text-xs font-medium text-gray-400 mb-1">
-                Color Palette
-              </label>
-              <Select
-                id="palette"
-                value={styleConfig.palette.name}
-                onChange={(e) => setStyleConfig({ ...styleConfig, palette: PALETTES.find(p => p.name === e.target.value) || PALETTES[0] })}
-              >
-                {PALETTES.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
-              </Select>
-            </div>
-            <div>
-              <label htmlFor="font" className="block text-xs font-medium text-gray-400 mb-1">
-                Font
-              </label>
-              <Select
-                id="font"
-                value={styleConfig.font.name}
-                onChange={(e) => setStyleConfig({ ...styleConfig, font: FONTS.find(f => f.name === e.target.value) || FONTS[0] })}
-              >
-                {FONTS.map(f => <option key={f.name} value={f.name}>{f.name}</option>)}
-              </Select>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-auto">
-        <Button onClick={onGenerate} disabled={isLoading} className="w-full">
-          {isLoading ? 'Generating...' : '✨ Generate Visual'}
+    <div className="w-80 bg-gray-900 border-r border-gray-700 p-6 flex flex-col gap-6">
+      <div className="space-y-2">
+        <label htmlFor="text-input" className="text-sm font-medium text-gray-300">
+          Your Text
+        </label>
+        <Textarea
+          id="text-input"
+          placeholder="Enter text, ideas, or a process..."
+          rows={10}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          className="bg-gray-800 border-gray-600"
+        />
+         <Button onClick={onSample} disabled={isLoading} className="w-full !py-1.5 !text-xs !bg-gray-700 hover:!bg-gray-600">
+          Load Sample Text
         </Button>
       </div>
+
+      <div className="space-y-2">
+        <label htmlFor="visual-type" className="text-sm font-medium text-gray-300">
+          Visualization Type
+        </label>
+        <Select
+          id="visual-type"
+          value={visualType}
+          onChange={(e) => setVisualType(e.target.value as VisualType)}
+          className="bg-gray-800 border-gray-600"
+        >
+          {VISUAL_TYPES.map((type) => (
+            <option key={type.value} value={type.value}>
+              {type.label}
+            </option>
+          ))}
+        </Select>
+      </div>
+
+      <Button onClick={onGenerate} disabled={isLoading || !text.trim()} className="mt-auto">
+        {isLoading ? (
+          'Generating...'
+        ) : (
+          <>
+            <Zap className="w-5 h-5 mr-2" />
+            Generate Visual
+          </>
+        )}
+      </Button>
     </div>
   );
 };

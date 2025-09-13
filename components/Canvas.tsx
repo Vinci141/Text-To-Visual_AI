@@ -1,64 +1,70 @@
-import React, { forwardRef } from 'react';
-import type { VisualData, StyleConfig, MindMapNode, FlowchartNode, ListItem } from '../types';
+import React from 'react';
+import { VisualData, VisualType } from '../types';
 import { MindMap } from './visuals/MindMap';
 import { Flowchart } from './visuals/Flowchart';
 import { ListComponent } from './visuals/ListComponent';
 import { Loader } from './ui/Loader';
-import { AlertTriangle, Lightbulb } from 'lucide-react';
+import { ExportControls } from './ExportControls';
+import { Bot, TriangleAlert } from 'lucide-react';
 
 interface CanvasProps {
-  visualData: VisualData | null;
-  visualType: 'mind_map' | 'flowchart' | 'list';
+  visualType: VisualType;
+  data: VisualData | null;
   isLoading: boolean;
   error: string | null;
-  styleConfig: StyleConfig;
+  canvasRef: React.RefObject<HTMLDivElement>;
+  onExport: (format: 'png' | 'svg' | 'pdf') => void;
 }
 
-export const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
-  ({ visualData, visualType, isLoading, error, styleConfig }, ref) => {
-    
-    const renderContent = () => {
-      if (isLoading) {
-        return <Loader />;
-      }
-      if (error) {
-        return (
-          <div className="text-center text-red-400 flex flex-col items-center gap-4">
-            <AlertTriangle className="w-12 h-12" />
-            <h3 className="text-lg font-semibold">Generation Failed</h3>
-            <p className="max-w-md text-sm text-gray-400">{error}</p>
-          </div>
-        );
-      }
-      if (visualData) {
-        // When a flowchart or list is requested, the data should be an array.
-        // This defensive check wraps the data in an array if the AI happens to 
-        // return a single object instead, preventing the app from crashing.
-        const normalizedData = (visualType === 'flowchart' || visualType === 'list') && !Array.isArray(visualData)
-          ? [visualData]
-          : visualData;
+const WelcomeMessage = () => (
+  <div className="flex flex-col items-center justify-center gap-4 text-center">
+    <Bot className="w-16 h-16 text-purple-400" />
+    <h2 className="text-2xl font-bold text-gray-200">Welcome to the AI Visual Generator</h2>
+    <p className="max-w-md text-gray-400">
+      Enter some text, select a visualization type, and watch the AI bring your ideas to life.
+    </p>
+  </div>
+);
 
-        return (
-          <div id="visual-output" className="p-8 bg-gray-900">
-            {visualType === 'mind_map' && <MindMap data={normalizedData as MindMapNode} styleConfig={styleConfig} />}
-            {visualType === 'flowchart' && <Flowchart data={normalizedData as FlowchartNode[]} styleConfig={styleConfig} />}
-            {visualType === 'list' && <ListComponent data={normalizedData as ListItem[]} styleConfig={styleConfig} />}
-          </div>
-        );
-      }
-      return (
-        <div className="text-center text-gray-500 flex flex-col items-center gap-4">
-          <Lightbulb className="w-12 h-12 text-yellow-400" />
-          <h3 className="text-lg font-semibold">Your visual will appear here</h3>
-          <p className="max-w-md text-sm">Enter some text, choose your options, and click "Generate Visual" to get started.</p>
-        </div>
-      );
-    };
+const ErrorDisplay = ({ message }: { message: string }) => (
+  <div className="flex flex-col items-center justify-center gap-4 text-center text-red-400">
+    <TriangleAlert className="w-16 h-16" />
+    <h2 className="text-2xl font-bold">An Error Occurred</h2>
+    <p className="max-w-md">{message}</p>
+  </div>
+);
 
-    return (
-      <div ref={ref} className="flex-1 flex items-center justify-center p-4 lg:p-8 overflow-auto bg-gray-900">
+
+export const Canvas: React.FC<CanvasProps> = ({ visualType, data, isLoading, error, canvasRef, onExport }) => {
+  const renderContent = () => {
+    if (isLoading) {
+      return <Loader />;
+    }
+    if (error) {
+      return <ErrorDisplay message={error} />;
+    }
+    if (!data) {
+      return <WelcomeMessage />;
+    }
+
+    switch (visualType) {
+      case 'mind_map':
+        return <MindMap data={data as any} />;
+      case 'flowchart':
+        return <Flowchart data={data as any} />;
+      case 'list':
+        return <ListComponent data={data as any} />;
+      default:
+        return <WelcomeMessage />;
+    }
+  };
+
+  return (
+    <div className="relative flex-1 bg-gray-800 flex items-center justify-center overflow-auto">
+      <div ref={canvasRef} className="bg-gray-800 text-white p-4">
         {renderContent()}
       </div>
-    );
-  }
-);
+      {data && !isLoading && !error && <ExportControls onExport={onExport} />}
+    </div>
+  );
+};
