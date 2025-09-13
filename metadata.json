@@ -1,0 +1,5 @@
+{
+  "name": "AI Text-to-Visual Generator",
+  "description": "An intelligent web application that transforms plain text into beautiful and structured visuals like mind maps, flowcharts, and lists. Users can input text, choose a visual format, customize styles, and export the final graphic.",
+  "requestFramePermissions": []
+}
